@@ -5,18 +5,25 @@
 ## 主要特性
 
 - **高精度计算**: 所有内部计算均使用 `double` 类型，以确保最高的数值精度。
-- **高性能**: 核心算法为纯C++实现，避免了不必要的开销，速度很快。
-- **实现可切换**: 您可以通过一个宏在内置实现和OpenCV实现之间轻松切换。
-- **易于集成**: 纯头文件，无外部依赖（OpenCV仅为可选）。
+- **高性能**: 核心算法为纯C++实现，避免了不必要的开销，速度更快（当前迭代次数和opencv默认一致，所以精度一样，如需要提高精度，增加迭代次数即可，当处理耗时会增加）。
+- **实现可切换**: 可以通过一个宏在内置实现和OpenCV实现之间轻松切换。
+- **智能编译**: **OpenCV是可选的**。如果系统中没有安装OpenCV，项目依然可以成功编译，并自动使用内置实现。
 - **支持模型**:
   - `cam_radtan.h`: **Radtan模型** (Brown-Conrady)，兼容OpenCV和Kalibr的 `pinhole-radtan`。
   - `cam_equi.h`: **鱼眼模型** (Equidistant)，兼容OpenCV和Kalibr的 `pinhole-equi`。
 
+## 环境要求
+
+- **C++17 编译器**: 例如 GCC 8+ 或 Clang 6+。
+- **CMake**: 3.10 或更高版本。
+- **Eigen3**: 必需。
+- **OpenCV**: 可选，用于启用备用实现。
+
 ## 快速上手
 
-#### 1. 包含头文件
+### 包含头文件
 
-您只需要包含 `cam_radtan.h` 或 `cam_equi.h`。它们会自动包含基类 `cam_base.h`。
+只需要包含 `cam_radtan.h` 或 `cam_equi.h`。
 
 ```cpp
 #include "cam_radtan.h" // Radtan模型
@@ -24,9 +31,9 @@
 #include "cam_equi.h"   // 鱼眼模型
 ```
 
-#### 2. 选择实现方式 (可选)
+### 选择实现方式 (可选)
 
-默认情况下，库使用内置的高性能迭代算法。如果您希望改用OpenCV的实现，只需打开 `cam_base.h` 文件，并取消对以下宏的注释：
+默认情况下，库使用内置的高性能迭代算法。如果希望改用OpenCV的实现，只需打开 `cam_base.h` 文件，并取消对以下宏的注释：
 
 ```cpp
 // 在 cam_base.h 文件顶部
@@ -34,18 +41,18 @@
 // 取消注释后变为:
 #define USE_OPENCV_IMPL
 ```
-这个开关将同时对 `CamRadtan` 和 `CamEqui` 生效。
+这个开关将同时对 `CamRadtan` 和 `CamEqui` 生效。如果CMake在编译时未找到OpenCV，即使此宏被定义，编译器也会安全地忽略它并使用内置实现。
 
-#### 3. 定义相机参数
+### 定义相机参数
 
-您需要准备相机的内参和畸变系数。
+准备相机的内参和畸变系数。
 
 - **内参 `K`** (`std::vector<double>`): `[fx, fy, cx, cy]`
 - **畸变系数 `D`** (`std::vector<double>`):
   - `CamRadtan`: `[k1, k2, p1, p2, k3]` (k3可选)
   - `CamEqui`: `[k1, k2, k3, k4]`
 
-#### 4. 创建相机实例
+### 创建相机实例
 
 ```cpp
 // 图像尺寸
@@ -58,7 +65,7 @@ std::vector<double> D = {-0.28340811, 0.07395907, 0.00019359, 1.76187114e-05};
 CamRadtan camera(width, height, K, D);
 ```
 
-#### 5. 转换坐标
+### 转换坐标
 
 使用 `undistort` (去畸变) 和 `distort` (畸变) 函数进行坐标转换。库提供了三种函数变体以适应不同的数据类型：
 
@@ -82,34 +89,30 @@ std::cout << "畸变点: (" << distorted_point.x() << ", " << distorted_point.y(
 std::cout << "归一化点: (" << normalized_point.x() << ", " << normalized_point.y() << ")" << std::endl;
 ```
 
----
-
 ## 编译与测试
 
-本项目使用 `CMake` 进行构建。您需要先在您的Linux系统上安装 `g++`, `cmake`, `Eigen3` 和 `OpenCV`。
+本项目使用 `CMake` 进行构建。
 
-**Ubuntu/Debian 安装依赖:**
-```bash
-sudo apt-get update
-sudo apt-get install build-essential cmake libeigen3-dev libopencv-dev
-```
+- Ubuntu/Debian 安装依赖
 
-#### 编译步骤
+  ```bash
+  # 必需的
+  sudo apt-get update
+  sudo apt-get install build-essential cmake libeigen3-dev
 
-1.  创建一个构建目录并进入：
-    ```bash
-    mkdir build && cd build
-    ```
+  # 可选的 (用于启用OpenCV实现)
+  sudo apt-get install libopencv-dev
+  ```
 
-2.  运行 CMake 配置并编译：
-    ```bash
-    cmake ..
-    make
-    ```
+- 编译
 
-3.  编译成功后，您会在 `build` 目录下找到一个名为 `camera_test` 的可执行文件。
+  ```bash
+  mkdir build && cd build
+  cmake ..
+  make -j
+  ```
 
-#### 运行测试
+### 运行测试
 
 直接运行可执行文件即可看到正确性和速度测试的结果。
 
