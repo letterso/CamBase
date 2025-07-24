@@ -80,7 +80,7 @@ public:
    * @return 2d vector of normalized coordinates
    */
 
-#if defined(USE_OPENCV_IMPL) && defined(HAVE_OPENCV)
+#if defined(HAVE_OPENCV)
   cv::Point2f undistort_cv(const cv::Point2f &uv_dist) {
     Eigen::Vector2d eigen_pt(uv_dist.x, uv_dist.y);
     Eigen::Vector2d eigen_undistorted = undistort_d(eigen_pt);
@@ -109,7 +109,7 @@ public:
    * @param uv_norm Normalized coordinates we wish to distort
    * @return 2d vector of raw uv coordinate
    */
-#if defined(USE_OPENCV_IMPL) && defined(HAVE_OPENCV)
+#if defined(HAVE_OPENCV)
   cv::Point2f distort_cv(const cv::Point2f &uv_norm) {
     Eigen::Vector2d eigen_pt(uv_norm.x, uv_norm.y);
     Eigen::Vector2d eigen_distorted = distort_d(eigen_pt);
