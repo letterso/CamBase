@@ -1,6 +1,6 @@
-# 相机畸变模型库
+# 相机模型通用库
 
-这是一个轻量级的纯头文件C++库，用于处理常见的相机镜头畸变。它提供了在**畸变像素坐标**和**归一化相机坐标**之间进行转换的功能，具有高精度和高性能的特点。
+参考[open_vins](https://github.com/rpng/open_vins/tree/master/ov_core/src/cam)实现的轻量级的纯头文件C++库，用于处理针孔和鱼眼相机镜头畸变。它提供了在**畸变像素坐标**和**归一化相机坐标**之间进行转换的功能，具有高精度和高性能的特点。
 
 ## 主要特性
 
@@ -122,3 +122,69 @@ sudo apt-get install build-essential cmake libeigen3-dev libopencv-dev
 要对比内置实现和OpenCV实现的性能，您只需：
 1.  修改 `cam_base.h` 中的 `#define USE_OPENCV_IMPL` 宏（注释或取消注释）。
 2.  重新编译 (`make`) 并再次运行测试。
+
+测试结果
+
+- 内置迭代算法
+
+  ```bash
+  ============================================================
+    Radtan Model Test
+  ============================================================
+  Radtan (Internal) Correctness Test:
+    Original Point:      (0.3, -0.2)
+    Distorted Pixel:     (772.204, 271.3)
+    Final Undistorted:   (0.3, -0.2)
+    Round-trip Error:    2.271766e-08
+    [SUCCESS] Low error.
+
+  Radtan (Internal) Speed Test (100000 points):
+    distort() time:   0.295156 ms
+    undistort() time: 2.670738 ms
+
+  ============================================================
+    Equi (Fisheye) Model Test
+  ============================================================
+  Equi (Internal) Correctness Test:
+    Original Point:      (0.300000, -0.200000)
+    Distorted Pixel:     (732.269954, 298.525131)
+    Final Undistorted:   (0.300000, -0.200000)
+    Round-trip Error:    1.494683e-16
+    [SUCCESS] Low error.
+
+  Equi (Internal) Speed Test (100000 points):
+    distort() time:   1.358781 ms
+    undistort() time: 7.232002 ms
+  ```
+
+- opencv
+
+  ```bash
+  ============================================================
+    Radtan Model Test
+  ============================================================
+  Radtan (OpenCV) Correctness Test:
+    Original Point:      (0.3, -0.2)
+    Distorted Pixel:     (772.204, 271.3)
+    Final Undistorted:   (0.3, -0.2)
+    Round-trip Error:    2.271766e-08
+    [SUCCESS] Low error.
+
+  Radtan (OpenCV) Speed Test (100000 points):
+    distort() time:   0.297319 ms
+    undistort() time: 54.243528 ms
+
+  ============================================================
+    Equi (Fisheye) Model Test
+  ============================================================
+  Equi (OpenCV) Correctness Test:
+    Original Point:      (0.300000, -0.200000)
+    Distorted Pixel:     (732.269954, 298.525131)
+    Final Undistorted:   (0.300000, -0.200000)
+    Round-trip Error:    1.494683e-16
+    [SUCCESS] Low error.
+
+  Equi (OpenCV) Speed Test (100000 points):
+    distort() time:   1.251700 ms
+    undistort() time: 37.757270 ms
+  ```
