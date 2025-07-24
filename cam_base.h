@@ -28,7 +28,7 @@
 
 // Uncomment the following line to use the OpenCV-based undistortion implementations
 // for all supported camera models (Radtan, Equi).
-#define USE_OPENCV_IMPL
+// #define USE_OPENCV_IMPL
 
 
 /**
