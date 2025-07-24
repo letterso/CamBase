@@ -79,11 +79,14 @@ public:
    * @param uv_dist Raw uv coordinate we wish to undistort
    * @return 2d vector of normalized coordinates
    */
+
+#if defined(USE_OPENCV_IMPL) && defined(HAVE_OPENCV)
   cv::Point2f undistort_cv(const cv::Point2f &uv_dist) {
     Eigen::Vector2d eigen_pt(uv_dist.x, uv_dist.y);
     Eigen::Vector2d eigen_undistorted = undistort_d(eigen_pt);
     return cv::Point2f(static_cast<float>(eigen_undistorted.x()), static_cast<float>(eigen_undistorted.y()));
   }
+#endif
 
   /**
    * @brief Given a normalized uv coordinate this will distort it to the raw image plane
@@ -106,11 +109,13 @@ public:
    * @param uv_norm Normalized coordinates we wish to distort
    * @return 2d vector of raw uv coordinate
    */
+#if defined(USE_OPENCV_IMPL) && defined(HAVE_OPENCV)
   cv::Point2f distort_cv(const cv::Point2f &uv_norm) {
     Eigen::Vector2d eigen_pt(uv_norm.x, uv_norm.y);
     Eigen::Vector2d eigen_distorted = distort_d(eigen_pt);
     return cv::Point2f(static_cast<float>(eigen_distorted.x()), static_cast<float>(eigen_distorted.y()));
   }
+#endif
 
   /// Gets the camera matrix by const reference
   const std::vector<double>& get_K() const noexcept { return camera_k_; }
