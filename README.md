@@ -33,24 +33,28 @@
 
 ### 选择实现方式 (可选)
 
-默认情况下，库使用内置的高性能迭代算法。如果希望改用OpenCV的实现，只需打开 `cam_base.h` 文件，并取消对以下宏的注释：
+默认情况下，库使用内置迭代算法，如果希望改用OpenCV的实现，只需修改 `cam_base.h` 的宏：
 
 ```cpp
-// 在 cam_base.h 文件顶部
 // #define USE_OPENCV_IMPL
-// 取消注释后变为:
-#define USE_OPENCV_IMPL
 ```
-这个开关将同时对 `CamRadtan` 和 `CamEqui` 生效。如果CMake在编译时未找到OpenCV，即使此宏被定义，编译器也会安全地忽略它并使用内置实现。
+这个开关将同时对 `CamRadtan` 和 `CamEqui` 生效，如果CMake在编译时未找到OpenCV，即使此宏被定义，编译器也会安全地忽略它并使用内置实现。
 
 ### 定义相机参数
 
-准备相机的内参和畸变系数。
+相机内参 `K` (`std::vector<double>`)
 
-- **内参 `K`** (`std::vector<double>`): `[fx, fy, cx, cy]`
-- **畸变系数 `D`** (`std::vector<double>`):
-  - `CamRadtan`: `[k1, k2, p1, p2, k3]` (k3可选)
-  - `CamEqui`: `[k1, k2, k3, k4]`
+ `[fx, fy, cx, cy]`
+
+畸变参数 `D` (`std::vector<double>`)
+
+- Radial-Tangential
+
+    `CamRadtan`: `[k1, k2, p1, p2, k3]` (k3可选)
+
+-  Equidistant (Kannala-Brandt)
+
+    `CamEqui`: `[k1, k2, k3, k4]`
 
 ### 创建相机实例
 
@@ -67,7 +71,7 @@ CamRadtan camera(width, height, K, D);
 
 ### 转换坐标
 
-使用 `undistort` (去畸变) 和 `distort` (畸变) 函数进行坐标转换。库提供了三种函数变体以适应不同的数据类型：
+使用 `undistort` (去畸变) 和 `distort` (畸变) 函数进行转换，库提供了三种函数变体以适应不同的数据类型：
 
 - `undistort_d(...)` / `distort_d(...)`: **(核心)** 使用 `double` 和 `Eigen::Vector2d`，精度最高。
 - `undistort_f(...)` / `distort_f(...)`: 使用 `float` 和 `Eigen::Vector2f` 的包装器。
