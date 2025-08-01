@@ -1,6 +1,6 @@
 # 相机模型通用库
 
-参考[open_vins](https://github.com/rpng/open_vins/tree/master/ov_core/src/cam)实现的轻量级的纯头文件C++库，用于处理针孔和鱼眼相机镜头畸变。它提供了在**畸变像素坐标**和**归一化相机坐标**之间进行转换的功能，具有高精度和高性能的特点。
+接口参考[open_vins](https://github.com/rpng/open_vins/tree/master/ov_core/src/cam)，实现参考[vins](https://github.com/HKUST-Aerial-Robotics/VINS-Fusion)，轻量级的纯头文件C++库，用于处理针孔和鱼眼相机镜头畸变。它提供了在**畸变像素坐标**和**归一化相机坐标**之间进行转换的功能。
 
 ## 主要特性
 
