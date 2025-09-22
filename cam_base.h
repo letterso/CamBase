@@ -104,17 +104,24 @@ public:
     return distort_d(uv_norm.cast<double>()).cast<float>();
   }
 
+#if defined(HAVE_OPENCV)
   /**
    * @brief Given a normalized uv coordinate this will distort it to the raw image plane
    * @param uv_norm Normalized coordinates we wish to distort
    * @return 2d vector of raw uv coordinate
    */
-#if defined(HAVE_OPENCV)
   cv::Point2f distort_cv(const cv::Point2f &uv_norm) {
     Eigen::Vector2d eigen_pt(uv_norm.x, uv_norm.y);
     Eigen::Vector2d eigen_distorted = distort_d(eigen_pt);
     return cv::Point2f(static_cast<float>(eigen_distorted.x()), static_cast<float>(eigen_distorted.y()));
   }
+
+  /**
+   * @brief Undistorts an entire image
+   * @param distorted_image Input distorted image
+   * @return Undistorted image
+   */
+  virtual cv::Mat undistort_image(const cv::Mat& distorted_image) = 0;
 #endif
 
   /// Gets the camera matrix by const reference

@@ -78,6 +78,50 @@ void run_speed_test(CamBase& camera, std::string_view model_name) {
     std::cout << "  undistort() time: " << undistort_ms.count() << " ms\n";
 }
 
+#if defined(HAVE_OPENCV)
+// Image Undistortion Test
+void run_image_undistort_test(CamBase& camera, std::string_view model_name) {    
+    // Create a test image with a grid pattern
+    int width = camera.w();
+    int height = camera.h();
+    cv::Mat test_image(height, width, CV_8UC3, cv::Scalar(0, 0, 0));
+    
+    // Draw a grid pattern on the image
+    for (int i = 0; i < height; i += 50) {
+        cv::line(test_image, cv::Point(0, i), cv::Point(width, i), cv::Scalar(0, 255, 0), 1);
+    }
+    for (int i = 0; i < width; i += 50) {
+        cv::line(test_image, cv::Point(i, 0), cv::Point(i, height), cv::Scalar(0, 255, 0), 1);
+    }
+    
+    // Draw some circles to better visualize distortion
+    for (int i = 100; i < width; i += 200) {
+        for (int j = 100; j < height; j += 200) {
+            cv::circle(test_image, cv::Point(i, j), 30, cv::Scalar(255, 0, 0), 2);
+        }
+    }
+    
+    // Distort the image to simulate a real distorted image
+    // For this test, we'll just use the undistort function directly on our grid image
+    std::cout << "  Creating test image with grid pattern...\n";
+    std::cout << "  Running image undistortion...\n";
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    cv::Mat undistorted_image = camera.undistort_image(test_image);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    
+    std::cout << "  Image undistortion time: " << elapsed.count() << " ms\n";
+    std::cout << "  Input image size: " << test_image.cols << "x" << test_image.rows << "\n";
+    std::cout << "  Output image size: " << undistorted_image.cols << "x" << undistorted_image.rows << "\n";
+    
+    // Save images for visual inspection (optional)
+    // cv::imwrite("test_image_distorted.png", test_image);
+    // cv::imwrite("test_image_undistorted.png", undistorted_image);
+    
+    std::cout << "  [SUCCESS] Image undistortion completed.\n";
+}
+#endif
 
 int main() {
     int width = 1280;
@@ -90,6 +134,9 @@ int main() {
         CamRadtan radtan_camera(width, height, K_radtan, D_radtan);
         run_correctness_test(radtan_camera, "Radtan");
         run_speed_test(radtan_camera, "Radtan");
+#if defined(HAVE_OPENCV)
+        run_image_undistort_test(radtan_camera, "Radtan");
+#endif
     }
 
     {
@@ -99,6 +146,9 @@ int main() {
         CamEqui equi_camera(width, height, K_equi, D_equi);
         run_correctness_test(equi_camera, "Equi");
         run_speed_test(equi_camera, "Equi");
+#if defined(HAVE_OPENCV)
+        run_image_undistort_test(equi_camera, "Equi");
+#endif
     }
 
     return 0;

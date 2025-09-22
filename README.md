@@ -93,6 +93,23 @@ std::cout << "畸变点: (" << distorted_point.x() << ", " << distorted_point.y(
 std::cout << "归一化点: (" << normalized_point.x() << ", " << normalized_point.y() << ")" << std::endl;
 ```
 
+### 图像去畸变
+
+库还支持对整个图像进行去畸变处理，基于opencv实现：
+
+```cpp
+#include <opencv2/opencv.hpp>
+
+// 读取畸变图像
+cv::Mat distorted_image = cv::imread("distorted_image.jpg");
+
+// 对整个图像进行去畸变
+cv::Mat undistorted_image = camera.undistort_image(distorted_image);
+
+// 保存去畸变后的图像
+cv::imwrite("undistorted_image.jpg", undistorted_image);
+```
+
 ## 编译与测试
 
 本项目使用 `CMake` 进行构建。

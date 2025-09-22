@@ -39,11 +39,16 @@ public:
       k1_(camera_d[0]), k2_(camera_d[1]), p1_(camera_d[2]), p2_(camera_d[3]),
       k3_(camera_d.size() > 4 ? camera_d[4] : 0.0)
   {
-#if defined(USE_OPENCV_IMPL) && defined(HAVE_OPENCV)
+#if defined(HAVE_OPENCV)
     camera_k_OPENCV(0, 0) = camera_k_[0]; camera_k_OPENCV(0, 1) = 0;   camera_k_OPENCV(0, 2) = camera_k_[2];
     camera_k_OPENCV(1, 0) = 0;   camera_k_OPENCV(1, 1) = camera_k_[1]; camera_k_OPENCV(1, 2) = camera_k_[3];
     camera_k_OPENCV(2, 0) = 0;   camera_k_OPENCV(2, 1) = 0;   camera_k_OPENCV(2, 2) = 1;
     camera_d_OPENCV = cv::Mat(1, camera_d.size(), CV_64F, const_cast<double*>(camera_d.data()));
+    
+    // Precompute undistortion maps for better performance
+    cv::initUndistortRectifyMap(camera_k_OPENCV, camera_d_OPENCV, cv::Mat(), 
+                                camera_k_OPENCV, cv::Size(width_, height_), 
+                                CV_32FC1, map1_, map2_);
 #endif
   }
 
@@ -91,13 +96,28 @@ public:
     return Eigen::Vector2d(fx_ * x_distorted + cx_, fy_ * y_distorted + cy_);
   }
 
+#if defined(HAVE_OPENCV)
+  /**
+   * @brief Undistorts an entire image using OpenCV
+   * @param distorted_image Input distorted image
+   * @return Undistorted image
+   */
+  cv::Mat undistort_image(const cv::Mat& distorted_image) override {
+    // Use precomputed undistortion maps for better performance
+    cv::Mat undistorted_image;
+    cv::remap(distorted_image, undistorted_image, map1_, map2_, cv::INTER_LINEAR);
+    return undistorted_image;
+  }
+#endif
+
 private:
   double fx_, fy_, cx_, cy_;
   double k1_, k2_, k3_, p1_, p2_;
 
-#if defined(USE_OPENCV_IMPL) && defined(HAVE_OPENCV)
+#if defined(HAVE_OPENCV)
   cv::Matx33d camera_k_OPENCV;
   cv::Mat camera_d_OPENCV;
+  cv::Mat map1_, map2_;  // Precomputed undistortion maps
 #endif
 };
 
