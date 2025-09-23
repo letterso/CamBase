@@ -52,9 +52,14 @@ public:
    * @param height Height of the camera (raw pixels)
    * @param camera_k Camera intrinsics vector [fx, fy, cx, cy]
    * @param camera_d Camera distortion vector
+   * @param scale Camera Scaling
    */
-  CamBase(int width, int height, const std::vector<double> &camera_k, const std::vector<double> &camera_d) :
-    width_(width), height_(height), camera_k_(camera_k), camera_d_(camera_d){}
+  CamBase(int width, int height, const std::vector<double> &camera_k, const std::vector<double> &camera_d, double scale = 1) : 
+    width_(width * scale), height_(height * scale), camera_k_(camera_k), camera_d_(camera_d), scale_(scale) {
+      for (auto &value : camera_k_) {
+        value *= scale;
+      }
+    }
 
   virtual ~CamBase() = default;
 
@@ -136,15 +141,19 @@ public:
   /// Gets the height of the camera images
   int h() const noexcept { return height_; }
 
+  /// Gets the scale of the camera images
+  double s() const noexcept { return scale_; }
+
 protected:
   // Cannot construct the base camera class, needs a distortion model
   CamBase() = default;
 
-  /// Width of the camera (raw pixels)
+  /// Height and Width of the camera (raw pixels)
   int width_;
-
-  /// Height of the camera (raw pixels)
   int height_;
+
+  /// scale of the camera
+  double scale_;
 
   /// Camera intrinsics in OpenCV format [fx, fy, cx, cy]
   std::vector<double> camera_k_;

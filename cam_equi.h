@@ -30,28 +30,36 @@
 class CamEqui : public CamBase {
 
 public:
-  /**
-   * @brief Constructor
-   */
-  CamEqui(int width, int height, const std::vector<double> &camera_k, const std::vector<double> &camera_d)
-    : CamBase(width, height, camera_k, camera_d),
-      fx_(camera_k[0]), fy_(camera_k[1]), cx_(camera_k[2]), cy_(camera_k[3]),
-      k1_(camera_d[0]), k2_(camera_d[1]), k3_(camera_d[2]), k4_(camera_d[3])
-  {
+    /**
+     * @brief Constructor
+     */
+    CamEqui(int width, int height, const std::vector<double> &camera_k, const std::vector<double> &camera_d, double scale = 1)
+        : CamBase(width, height, camera_k, camera_d, scale),
+          fx_(camera_k[0] * scale), fy_(camera_k[1] * scale), cx_(camera_k[2] * scale), cy_(camera_k[3] * scale),
+          k1_(camera_d[0]), k2_(camera_d[1]), k3_(camera_d[2]), k4_(camera_d[3])
+    {
 #if defined(HAVE_OPENCV)
-    camera_k_OPENCV(0, 0) = camera_k_[0]; camera_k_OPENCV(0, 1) = 0;   camera_k_OPENCV(0, 2) = camera_k_[2];
-    camera_k_OPENCV(1, 0) = 0;   camera_k_OPENCV(1, 1) = camera_k_[1]; camera_k_OPENCV(1, 2) = camera_k_[3];
-    camera_k_OPENCV(2, 0) = 0;   camera_k_OPENCV(2, 1) = 0;   camera_k_OPENCV(2, 2) = 1;
+        camera_k_OPENCV(0, 0) = fx_;
+        camera_k_OPENCV(0, 1) = 0;
+        camera_k_OPENCV(0, 2) = cx_;
+        camera_k_OPENCV(1, 0) = 0;
+        camera_k_OPENCV(1, 1) = fy_;
+        camera_k_OPENCV(1, 2) = cy_;
+        camera_k_OPENCV(2, 0) = 0;
+        camera_k_OPENCV(2, 1) = 0;
+        camera_k_OPENCV(2, 2) = 1;
 
-    camera_d_OPENCV(0) = camera_d_[0]; camera_d_OPENCV(1) = camera_d_[1];
-    camera_d_OPENCV(2) = camera_d_[2]; camera_d_OPENCV(3) = camera_d_[3];
-    
-    // Precompute undistortion maps for better performance
-    cv::fisheye::initUndistortRectifyMap(camera_k_OPENCV, camera_d_OPENCV, cv::Mat(), 
-                                         camera_k_OPENCV, cv::Size(width_, height_), 
-                                         CV_32FC1, map1_, map2_);
+        camera_d_OPENCV(0) = k1_;
+        camera_d_OPENCV(1) = k2_;
+        camera_d_OPENCV(2) = k3_;
+        camera_d_OPENCV(3) = k4_;
+
+        // Precompute undistortion maps for better performance
+        cv::fisheye::initUndistortRectifyMap(camera_k_OPENCV, camera_d_OPENCV, cv::Mat(),
+                                             camera_k_OPENCV, cv::Size(width_, height_),
+                                             CV_32FC1, map1_, map2_);
 #endif
-  }
+    }
 
   ~CamEqui() override = default;
 

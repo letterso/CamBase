@@ -33,22 +33,29 @@ public:
   /**
    * @brief Constructor
    */
-  CamRadtan(int width, int height, const std::vector<double> &camera_k, const std::vector<double> &camera_d)
-    : CamBase(width, height, camera_k, camera_d),
-      fx_(camera_k[0]), fy_(camera_k[1]), cx_(camera_k[2]), cy_(camera_k[3]),
+  CamRadtan(int width, int height, const std::vector<double> &camera_k, const std::vector<double> &camera_d, double scale = 1)
+    : CamBase(width, height, camera_k, camera_d, scale),
+      fx_(camera_k[0] * scale), fy_(camera_k[1] * scale), cx_(camera_k[2] * scale), cy_(camera_k[3] * scale),
       k1_(camera_d[0]), k2_(camera_d[1]), p1_(camera_d[2]), p2_(camera_d[3]),
       k3_(camera_d.size() > 4 ? camera_d[4] : 0.0)
   {
 #if defined(HAVE_OPENCV)
-    camera_k_OPENCV(0, 0) = camera_k_[0]; camera_k_OPENCV(0, 1) = 0;   camera_k_OPENCV(0, 2) = camera_k_[2];
-    camera_k_OPENCV(1, 0) = 0;   camera_k_OPENCV(1, 1) = camera_k_[1]; camera_k_OPENCV(1, 2) = camera_k_[3];
-    camera_k_OPENCV(2, 0) = 0;   camera_k_OPENCV(2, 1) = 0;   camera_k_OPENCV(2, 2) = 1;
-    camera_d_OPENCV = cv::Mat(1, camera_d.size(), CV_64F, const_cast<double*>(camera_d.data()));
-    
-    // Precompute undistortion maps for better performance
-    cv::initUndistortRectifyMap(camera_k_OPENCV, camera_d_OPENCV, cv::Mat(), 
-                                camera_k_OPENCV, cv::Size(width_, height_), 
-                                CV_32FC1, map1_, map2_);
+      camera_k_OPENCV(0, 0) = fx_;
+      camera_k_OPENCV(0, 1) = 0;
+      camera_k_OPENCV(0, 2) = cx_;
+      camera_k_OPENCV(1, 0) = 0;
+      camera_k_OPENCV(1, 1) = fy_;
+      camera_k_OPENCV(1, 2) = cy_;
+      camera_k_OPENCV(2, 0) = 0;
+      camera_k_OPENCV(2, 1) = 0;
+      camera_k_OPENCV(2, 2) = 1;
+
+      camera_d_OPENCV = cv::Mat(1, camera_d.size(), CV_64F, const_cast<double *>(camera_d.data()));
+
+      // Precompute undistortion maps for better performance
+      cv::initUndistortRectifyMap(camera_k_OPENCV, camera_d_OPENCV, cv::Mat(),
+                                  camera_k_OPENCV, cv::Size(width_, height_),
+                                  CV_32FC1, map1_, map2_);
 #endif
   }
 
